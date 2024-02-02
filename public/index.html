@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" type="text/css" href="app.css" />
+		<title>Weather App</title>
+	</head>
+	<body>
+		<header class="heading">
+			<h1>Weather App</h1>
+		</header>
+		<form id="citiesForm" class="wrapper">
+			<label for="cityInput">Enter Cities (comma-separated):</label>
+			<input
+				type="text"
+				id="cityInput"
+				placeholder="e.g., Toronto, Mumbai, London"
+			/>
+			<button type="submit" id="submitBtn">Get Weather</button>
+		</form>
+
+		<div id="weatherResults" class="wrapper"></div>
+
+		<script>
+			document
+				.getElementById("citiesForm")
+				.addEventListener("submit", (e) => getWeather(e));
+
+			async function getWeather(event) {
+				event.preventDefault();
+
+				const cityInput = document.getElementById("cityInput").value;
+				const cities =
+					cityInput.length === 0
+						? ""
+						: cityInput.split(",").map((city) => city.trim());
+
+				const response = await fetch("/getWeather", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ cities: cities }),
+				});
+
+				const data = await response.json();
+				if (data.hasOwnProperty("error")) {
+					alert(data.error);
+					document.getElementById("weatherResults").innerHTML = "";
+					return;
+				}
+
+				const weatherResultsDiv =
+					document.getElementById("weatherResults");
+				weatherResultsDiv.innerHTML = `
+					<div class="heading"><h3>Weather Results</h3></div>
+					<table>
+						<thead>
+							<tr>
+							<th>City</th>
+							<th>Temperature</th>
+							</tr>
+						</thead>
+						<tbody id="weatherTableBody">
+						</tbody>
+					</table>
+				`;
+
+				const tableBody =
+					weatherResultsDiv.querySelector("#weatherTableBody");
+				for (const city in data.weather) {
+					const row = document.createElement("tr");
+					row.innerHTML = `<td>${city}</td><td>${data.weather[city]}</td>`;
+
+					tableBody.appendChild(row);
+				}
+			}
+		</script>
+	</body>
+</html>
