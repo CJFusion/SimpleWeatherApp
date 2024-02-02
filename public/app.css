@@ -49,6 +49,10 @@ td {
 	border: 1px solid;
 }
 
+td:first-child {
+	text-transform: capitalize;
+}
+
 td:last-child {
 	text-align: center;
 }
